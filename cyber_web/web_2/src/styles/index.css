@@ -1,0 +1,167 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+@theme inline {
+  --font-display: var(--cy-font-display);
+  --font-sans: var(--cy-font-body);
+  --font-mono: var(--cy-font-mono);
+
+  --color-background: var(--cy-background);
+  --color-surface: var(--cy-surface);
+  --color-raised: var(--cy-surface-raised);
+  --color-line: var(--cy-border);
+  --color-ink: var(--cy-text-primary);
+  --color-secondary: var(--cy-text-secondary);
+  --color-muted: var(--cy-text-muted);
+  --color-accent: var(--cy-accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-active: var(--accent-active);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--cy-success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--cy-warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--cy-danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-hover: var(--hover);
+  --color-overlay: var(--overlay);
+  --color-disabled: var(--disabled);
+
+  --radius-sm: var(--cy-radius-sm);
+  --radius-md: var(--cy-radius-md);
+  --radius-lg: var(--cy-radius-lg);
+  --radius-xl: var(--cy-radius-xl);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  html {
+    background: var(--background);
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--cy-font-body);
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text-primary);
+    background:
+      radial-gradient(1200px 560px at 12% -10%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 58%),
+      radial-gradient(900px 480px at 100% 0%, color-mix(in srgb, var(--success) 6%, transparent), transparent 52%),
+      var(--background);
+    letter-spacing: 0.01em;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    min-height: 100svh;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--cy-font-display);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--accent) 35%, transparent);
+    color: var(--text-primary);
+  }
+}
+
+@utility type-display {
+  font-family: var(--cy-font-display);
+  font-size: clamp(2rem, 3.4vw, 3.25rem);
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  font-weight: 600;
+}
+
+@utility type-h1 {
+  font-family: var(--cy-font-display);
+  font-size: clamp(1.5rem, 2vw, 1.85rem);
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+  font-weight: 600;
+}
+
+@utility type-h2 {
+  font-family: var(--cy-font-display);
+  font-size: 1.25rem;
+  line-height: 1.25;
+  letter-spacing: -0.03em;
+  font-weight: 500;
+}
+
+@utility type-h3 {
+  font-family: var(--cy-font-display);
+  font-size: 1.05rem;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+}
+
+@utility type-body {
+  font-family: var(--cy-font-body);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+@utility type-small {
+  font-family: var(--cy-font-body);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+@utility type-caption {
+  font-family: var(--cy-font-body);
+  font-size: 0.6875rem;
+  line-height: 1.35;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+@utility type-technical {
+  font-family: var(--cy-font-mono);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
