@@ -18,23 +18,6 @@ import {
   Flag
 } from 'lucide-react';
 
-/**
- * Question Renderer component for displaying different question types
- *
- * @param {object} props - Component props
- * @param {object} props.question - Question object
- * @param {any} props.value - Current selected value
- * @param {function} props.onChange - Function to call when answer changes
- * @param {boolean} props.disabled - Whether question is disabled
- * @param {boolean} props.readOnly - Whether question is read-only
- * @param {boolean} props.showCorrectAnswer - Whether to show correct answer
- * @param {boolean} props.isCorrect - Whether the answer is correct
- * @param {number} props.questionNumber - Question number
- * @param {number} props.totalQuestions - Total number of questions
- * @param {function} props.onHint - Function to call when hint is requested
- * @param {string} props.className - Additional CSS classes
- * @returns {JSX.Element} - Question Renderer component
- */
 const QuestionRenderer = ({
   question,
   value,
@@ -52,12 +35,10 @@ const QuestionRenderer = ({
   const [selectedValue, setSelectedValue] = useState(value || '');
   const [showHint, setShowHint] = useState(false);
 
-  // Update local state when value prop changes
   useEffect(() => {
     setSelectedValue(value || '');
   }, [value]);
 
-  // Handle value changes
   const handleChange = useCallback((newValue) => {
     setSelectedValue(newValue);
     if (onChange) {
@@ -65,40 +46,6 @@ const QuestionRenderer = ({
     }
   }, [onChange]);
 
-  // Get icon for question type
-  const getTypeIcon = useCallback(() => {
-    switch (question.type) {
-      case QUESTION_types.MULTIPLE_CHOICE:
-        return CheckCircle;
-      case QUESTION_TYPES.MULTIPLE_SELECT:
-        return CheckSquare;
-      case QUESTION_TYPES.TRUE_FALSE:
-        return Type;
-      case QUESTION_TYPES.SHORT_ANSWER:
-        return FileText;
-      case QUESTION_TYPES.FLAG_SUBMISSION:
-        return Flag;
-      case QUESTION_TYPES.ORDERING:
-        return ListOrdered;
-      case QUESTION_TYPES.SCENARIO_DECISION:
-        return HelpCircle;
-      case QUESTION_TYPES.LOG_ANALYSIS:
-        return Code;
-      default:
-        return FileText;
-    }
-  }, [question.type]);
-
-  // Get answer status color
-  const getAnswerStatus = useCallback(() => {
-    if (showCorrectAnswer) {
-      if (isCorrect) return 'success';
-      if (value && value !== '') return 'danger';
-    }
-    return selectedValue && selectedValue !== '' ? 'primary' : 'gray';
-  }, [showCorrectAnswer, isCorrect, value, selectedValue]);
-
-  // Render Multiple Choice question
   const renderMultipleChoice = useCallback(() => {
     return (
       <div className="space-y-3">
@@ -107,48 +54,26 @@ const QuestionRenderer = ({
           const isSelected = selectedValue === optionValue;
           const isCorrectAnswer = showCorrectAnswer && question.correctAnswer === optionValue;
 
+          let borderClass = 'border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700';
+          if (isSelected) {
+            borderClass = 'border-blue-500 bg-blue-50 dark:bg-blue-900/20';
+          } else if (showCorrectAnswer && isCorrectAnswer) {
+            borderClass = 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20';
+          } else if (showCorrectAnswer && !isCorrectAnswer) {
+            borderClass = 'border-red-500 bg-red-50 dark:bg-red-900/20';
+          }
+
+          let cursorClass = disabled || readOnly ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer';
+
           return (
             <button
               key={index}
               onClick={() => !disabled && !readOnly && handleChange(optionValue)}
               disabled={disabled || readOnly}
-              className={`w-full flex items-center gap-3 p-4 rounded-lg border-2 text-left transition-all
-                \${
-                  isSelected
-                    ? `border-blue-500 bg-blue-50 dark:bg-blue-900/20 \${
-                      showCorrectAnswer
-                        ? isCorrectAnswer
-                          ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
-                          : 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                        : ''
-                    }`
-                    : `border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700 \${
-                      showCorrectAnswer && isCorrectAnswer
-                        ? 'border-emerald-300 bg-emerald-100 dark:bg-emerald-900/20'
-                        : ''
-                    }`
-                }
-                \${
-                  disabled || readOnly
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'cursor-pointer'
-                }
-              `}
+              className={`w-full flex items-center gap-3 p-4 rounded-lg border-2 text-left transition-all ${borderClass} ${cursorClass}`}
             >
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0
-                \${isSelected
-                  ? 'border-blue-500 bg-blue-500'
-                  : showCorrectAnswer && isCorrectAnswer
-                    ? 'border-emerald-500 bg-emerald-500'
-                    : 'border-gray-300 dark:border-gray-600'
-                }`}
-              >
-                {isSelected && (
-                  <div className="w-2 h-2 rounded-full bg-white" />
-                )}
-                {showCorrectAnswer && !isSelected && isCorrectAnswer && (
-                  <CheckCircle className="w-3 h-3 text-white" />
-                )}
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isSelected ? 'bg-blue-500 border-blue-500' : 'border-gray-300 dark:border-gray-600'}`}>
+                {isSelected && <CheckCircle className="w-3 h-3 text-white" />}
               </div>
               <span className={`flex-1 ${isSelected || (showCorrectAnswer && isCorrectAnswer) ? 'font-medium' : ''}`}>
                 {option}
@@ -160,76 +85,6 @@ const QuestionRenderer = ({
     );
   }, [question, selectedValue, disabled, readOnly, handleChange, showCorrectAnswer]);
 
-  // Render Multiple Select question
-  const renderMultipleSelect = useCallback(() => {
-    const selectedValues = Array.isArray(selectedValue) ? selectedValue : [];
-    return (
-      <div className="space-y-3">
-        {question.options?.map((option, index) => {
-          const optionValue = option.value || option;
-          const isSelected = selectedValues.includes(optionValue);
-          const isCorrectAnswer = showCorrectAnswer &&
-            (Array.isArray(question.correctAnswer)
-              ? question.correctAnswer.includes(optionValue)
-              : question.correctAnswer === optionValue);
-
-          return (
-            <button
-              key={index}
-              onClick={() => {
-                if (disabled || readOnly) return;
-
-                const newSelected = isSelected
-                  ? selectedValues.filter(v => v !== optionValue)
-                  : [...selectedValues, optionValue];
-
-                handleChange(newSelected);
-              }}
-              disabled={disabled || readOnly}
-              className={`w-full flex items-center gap-3 p-4 rounded-lg border-2 text-left transition-all
-                \${
-                  isSelected
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                    : `border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700 \${
-                      showCorrectAnswer && isCorrectAnswer
-                        ? 'border-emerald-300 bg-emerald-100 dark:bg-emerald-900/20'
-                        : ''
-                    }`
-                }
-                \${
-                  disabled || readOnly
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'cursor-pointer'
-                }
-              `}
-            >
-              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0
-                \${
-                  isSelected
-                    ? 'border-blue-500 bg-blue-500'
-                    : showCorrectAnswer && isCorrectAnswer
-                      ? 'border-emerald-500 bg-emerald-500'
-                      : 'border-gray-300 dark:border-gray-600'
-                }`}
-              >
-                {isSelected && (
-                  <CheckCircle className="w-3 h-3 text-white" />
-                )}
-                {showCorrectAnswer && !isSelected && isCorrectAnswer && (
-                  <CheckCircle className="w-3 h-3 text-white" />
-                )}
-              </div>
-              <span className={`flex-1 ${isSelected || (showCorrectAnswer && isCorrectAnswer) ? 'font-medium' : ''}`}>
-                {option}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-    );
-  }, [question, selectedValue, disabled, readOnly, handleChange, showCorrectAnswer]);
-
-  // Render True/False question
   const renderTrueFalse = useCallback(() => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -240,45 +95,28 @@ const QuestionRenderer = ({
           const isSelected = selectedValue === option.value;
           const isCorrectAnswer = showCorrectAnswer && question.correctAnswer === option.value;
 
+          let borderClass = 'border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700';
+          if (isSelected) {
+            borderClass = 'border-blue-500 bg-blue-50 dark:bg-blue-900/20';
+          } else if (showCorrectAnswer && isCorrectAnswer) {
+            borderClass = 'border-emerald-300 bg-emerald-100 dark:bg-emerald-900/20';
+          } else if (showCorrectAnswer && !isCorrectAnswer) {
+            borderClass = 'border-red-300 bg-red-100 dark:bg-red-900/20';
+          }
+
+          let cursorClass = disabled || readOnly ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer';
+
           return (
             <button
               key={option.value ? 'true' : 'false'}
               onClick={() => !disabled && !readOnly && handleChange(option.value)}
               disabled={disabled || readOnly}
-              className={`w-full flex items-center justify-center gap-2 p-4 rounded-lg border-2 transition-all
-                \${
-                  isSelected
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                    : `border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700 \${
-                      showCorrectAnswer && isCorrectAnswer
-                        ? 'border-emerald-300 bg-emerald-100 dark:bg-emerald-900/20'
-                        : ''
-                    }`
-                }
-                \${
-                  disabled || readOnly
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'cursor-pointer'
-                }
-              `}
+              className={`w-full flex items-center gap-3 p-4 rounded-lg border-2 text-left transition-all ${borderClass} ${cursorClass}`}
             >
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center
-                \${
-                  isSelected
-                    ? 'border-blue-500 bg-blue-500'
-                    : showCorrectAnswer && isCorrectAnswer
-                      ? 'border-emerald-500 bg-emerald-500'
-                      : 'border-gray-300 dark:border-gray-600'
-                }`}
-              >
-                {isSelected && (
-                  <div className="w-2 h-2 rounded-full bg-white" />
-                )}
-                {showCorrectAnswer && !isSelected && isCorrectAnswer && (
-                  <CheckCircle className="w-3 h-3 text-white" />
-                )}
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isSelected ? 'bg-blue-500 border-blue-500' : 'border-gray-300 dark:border-gray-600'}`}>
+                {isSelected && <CheckCircle className="w-3 h-3 text-white" />}
               </div>
-              <span className={`font-medium ${isSelected || (showCorrectAnswer && isCorrectAnswer) ? 'font-bold' : ''}`}>
+              <span className={`flex-1 ${isSelected || (showCorrectAnswer && isCorrectAnswer) ? 'font-bold' : ''}`}>
                 {option.label}
               </span>
             </button>
@@ -288,90 +126,71 @@ const QuestionRenderer = ({
     );
   }, [question, selectedValue, disabled, readOnly, handleChange, showCorrectAnswer]);
 
-  // Render Short Answer question
   const renderShortAnswer = useCallback(() => {
+    let inputBorderClass = 'border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+    if (showCorrectAnswer) {
+      inputBorderClass = isCorrect ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : 'border-red-500 bg-red-50 dark:bg-red-900/20';
+    }
+
     return (
       <div className="space-y-3">
-        <textarea
+        <input
+          type="text"
           value={selectedValue || ''}
-          onChange={(e) => handleChange(e.target.value)}
+          onChange={(e) => !disabled && !readOnly && handleChange(e.target.value)}
           disabled={disabled || readOnly}
-          placeholder="Enter your answer..."
-          rows={4}
-          className={`w-full p-4 rounded-lg border \${
-            isDarkMode
-              ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-              : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-          } \${
-            showCorrectAnswer
-              ? isCorrect
-                ? 'border-emerald-500'
-                : 'border-red-500'
-              : selectedValue
-                ? 'border-blue-500'
-                : 'border-gray-300 dark:border-gray-600'
-          } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+          placeholder="Enter your answer"
+          className={`w-full p-4 rounded-lg border ${inputBorderClass}`}
         />
-
-        {showCorrectAnswer && !isCorrect && (
-          <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-            <p className="text-sm text-red-700 dark:text-red-300">
-              <strong>Correct answer:</strong> {question.correctAnswer}
+        {showCorrectAnswer && question.correctAnswer && (
+          <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Correct answer: <span className="font-medium text-green-600 dark:text-green-400">{question.correctAnswer}</span>
             </p>
           </div>
         )}
       </div>
     );
-  }, [question, selectedValue, disabled, readOnly, handleChange, showCorrectAnswer, isCorrect, isDarkMode]);
+  }, [question, selectedValue, disabled, readOnly, handleChange, showCorrectAnswer, isCorrect]);
 
-  // Render Flag Submission question
   const renderFlagSubmission = useCallback(() => {
+    let inputBorderClass = 'border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+    if (showCorrectAnswer) {
+      inputBorderClass = isCorrect ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : 'border-red-500 bg-red-50 dark:bg-red-900/20';
+    }
+
     return (
       <div className="space-y-3">
         <div className="flex items-center gap-2 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
           <Flag className="w-5 h-5 text-blue-500" />
           <span className="text-gray-700 dark:text-gray-300">
-            Flag format: CYBERNEX{{...}}
+            Flag format: CYBERNEX&#123;...&#125;
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-2xl font-mono text-gray-400">CYBERNEX{</span>
+          <span className="text-2xl font-mono text-gray-400">CYBERNEX&#123;</span>
           <input
             type="text"
             value={selectedValue || ''}
-            onChange={(e) => handleChange(`CYBERNEX{${e.target.value}}`)}
+            onChange={(e) => !disabled && !readOnly && handleChange(`CYBERNEX{${e.target.value}}`)}
             disabled={disabled || readOnly}
             placeholder="Enter flag here"
-            className={`flex-1 p-3 rounded-lg border font-mono \${
-              isDarkMode
-                ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-            } \${
-              showCorrectAnswer
-                ? isCorrect
-                  ? 'border-emerald-500'
-                  : 'border-red-500'
-                : selectedValue
-                  ? 'border-blue-500'
-                  : 'border-gray-300 dark:border-gray-600'
-            } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+            className={`flex-1 p-3 rounded-lg border font-mono ${inputBorderClass}`}
           />
-          <span className="text-2xl font-mono text-gray-400">}</span>
+          <span className="text-2xl font-mono text-gray-400">&#125;</span>
         </div>
-
-        {showCorrectAnswer && !isCorrect && (
-          <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-            <p className="text-sm text-red-700 dark:text-red-300">
-              <strong>Correct flag:</strong> {question.correctAnswer}
+        {showCorrectAnswer && question.correctAnswer && (
+          <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              {isCorrect ? 'Correct flag!' : 'Try again'}
             </p>
           </div>
         )}
       </div>
     );
-  }, [question, selectedValue, disabled, readOnly, handleChange, showCorrectAnswer, isCorrect, isDarkMode]);
+  }, [question, selectedValue, disabled, readOnly, handleChange, showCorrectAnswer, isCorrect]);
 
-  // Render Ordering question
   const renderOrdering = useCallback(() => {
     const [orderedItems, setOrderedItems] = useState(
       question.options?.map((option, index) => ({
@@ -381,7 +200,6 @@ const QuestionRenderer = ({
       })) || []
     );
 
-    // Handle drag and drop
     const handleDragStart = (e, index) => {
       e.dataTransfer.setData('text/plain', index);
     };
@@ -400,6 +218,16 @@ const QuestionRenderer = ({
       handleChange(newOrderedItems.map(item => item.value));
     };
 
+    const isOrderedCorrectly = showCorrectAnswer &&
+      JSON.stringify(orderedItems.map(i => i.value)) === JSON.stringify(question.correctAnswer);
+
+    let containerBorderClass = 'border-gray-300 dark:border-gray-600';
+    if (showCorrectAnswer) {
+      containerBorderClass = isOrderedCorrectly ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : 'border-red-500 bg-red-50 dark:bg-red-900/20';
+    }
+
+    let cursorClass = disabled || readOnly ? 'opacity-50 cursor-default' : 'cursor-grab active:cursor-grabbing';
+
     return (
       <div className="space-y-3">
         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -407,32 +235,52 @@ const QuestionRenderer = ({
         </p>
 
         <div className="space-y-2">
-          {orderedItems.map((item, index) => {
-            const isCorrect = showCorrectAnswer &&
-              JSON.stringify(orderedItems.map(i => i.value)) ===
-              JSON.stringify(question.correctAnswer);
+          {orderedItems.map((item, index) => (
+            <div
+              key={item.value || index}
+              draggable={!disabled && !readOnly}
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDrop={(e) => handleDrop(e, index)}
+              className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-colors ${containerBorderClass} ${cursorClass}`}
+            >
+              <div className="flex-shrink-0">
+                <div className="w-6 h-6 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="w-4 h-4 text-gray-600 dark:text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                  </svg>
+                </div>
+              </div>
+              <span className="flex-1">{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }, [question, selectedValue, disabled, readOnly, handleChange, showCorrectAnswer, isCorrect, isDarkMode]);
 
-            return (
-              <div
-                key={item.value || index}
-                draggable={!disabled && !readOnly}
-                onDragStart={(e) => handleDragStart(e, index)}
-                onDragOver={(e) => handleDragOver(e, index)}
-                onDrop={(e) => handleDrop(e, index)}
-                className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-colors
-                  \${
-                    showCorrectAnswer
-                      ? isCorrect
-                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
-                        : 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                      : 'border-gray-300 dark:border-gray-600'
-                  }
-                  \${disabled || readOnly ? 'opacity-50 cursor-default' : 'cursor-grab active:cursor-grabbing'}
-                `}
-              >
-                <div className="flex-shrink-0">
-                  <div className="w-6 h-6 bg-gray-100 dark:bg-gray-700 rounded flex items-center justify-center">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="w-4 h-4 text-gray-600 dark:text-gray-400"
-                      fill
+  switch (question.type) {
+    case QUESTION_TYPES.MULTIPLE_CHOICE:
+      return renderMultipleChoice();
+    case QUESTION_TYPES.MULTIPLE_SELECT:
+      return renderMultipleChoice();
+    case QUESTION_TYPES.TRUE_FALSE:
+      return renderTrueFalse();
+    case QUESTION_TYPES.SHORT_ANSWER:
+      return renderShortAnswer();
+    case QUESTION_TYPES.FLAG_SUBMISSION:
+      return renderFlagSubmission();
+    case QUESTION_TYPES.ORDERING:
+      return renderOrdering();
+    default:
+      return renderMultipleChoice();
+  }
+};
+
+export default QuestionRenderer;

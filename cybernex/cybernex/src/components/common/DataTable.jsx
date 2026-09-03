@@ -5,7 +5,6 @@ import {
   ChevronLeft, ChevronRight, Filter, Eye, EyeOff
 } from 'lucide-react';
 import Button from './Button';
-import Checkbox from './Checkbox';
 import Dropdown from './Dropdown';
 import Pagination from './Pagination';
 import EmptyState from './EmptyState';

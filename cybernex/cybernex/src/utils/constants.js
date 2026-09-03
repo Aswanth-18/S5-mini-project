@@ -10,6 +10,19 @@ export const ROLES = {
   STUDENT: 'student',
 };
 
+// ===== DEPARTMENTS =====
+export const DEPARTMENTS = [
+  { value: 'cybersecurity', label: 'Cybersecurity' },
+  { value: 'computer_science', label: 'Computer Science' },
+  { value: 'information_technology', label: 'Information Technology' },
+  { value: 'software_engineering', label: 'Software Engineering' },
+  { value: 'network_engineering', label: 'Network Engineering' },
+  { value: 'data_science', label: 'Data Science' },
+  { value: 'ai_ml', label: 'AI/ML' },
+  { value: 'cloud_computing', label: 'Cloud Computing' },
+  { value: 'general', label: 'General Studies' }
+];
+
 // ===== PERMISSIONS =====
 export const PERMISSIONS = {
   // User Management
@@ -186,6 +199,14 @@ export const RESTRICTION_TYPES = {
   ACCOUNT_SUSPENDED: 'Account suspended',
 };
 
+// ===== RESTRICTION SEVERITY =====
+export const RESTRICTION_SEVERITY = {
+  LOW: 'low',
+  MEDIUM: 'medium',
+  HIGH: 'high',
+  CRITICAL: 'critical',
+};
+
 // ===== CERTIFICATE STATES =====
 export const CERTIFICATE_STATES = {
   LOCKED: 'Locked',
@@ -226,26 +247,7 @@ export const PAGINATION_DEFAULT = {
 };
 
 // ===== STORAGE KEYS =====
-export const STORAGE_KEYS = {
-  USER: 'cybernex_user',
-  USERS: 'cybernex_users',
-  COURSES: 'cybernex_courses',
-  LESSONS: 'cybernex_lessons',
-  LABS: 'cybernex_labs',
-  ASSESSMENTS: 'cybernex_assessments',
-  RESULTS: 'cybernex_results',
-  ATTENDANCE: 'cybernex_attendance',
-  SCHEDULES: 'cybernex_schedules',
-  VIOLATIONS: 'cybernex_violations',
-  NOTIFICATIONS: 'cybernex_notifications',
-  AUDIT_LOGS: 'cybernex_audit_logs',
-  PERMISSIONS: 'cybernex_permissions',
-  SETTINGS: 'cybernex_settings',
-  THEME: 'cybernex_theme',
-  STUDENT_PROGRESS: 'cybernex_student_progress',
-  ASSESSMENT_UNLOCKS: 'cybernex_assessment_unlocks',
-  RESTRICTIONS: 'cybernex_restrictions',
-};
+// Note: STORAGE_KEYS is defined later in this file with additional keys
 
 // ===== ASSESSMENT TIME CONSTANTS =====
 export const ASSESSMENT_TIME = {
@@ -1910,6 +1912,7 @@ export default {
   APP_VERSION,
   APP_DESCRIPTION,
   ROLES,
+  DEPARTMENTS,
   PERMISSIONS,
   ASSESSMENT_STATES,
   ASSESSMENT_TYPES,
@@ -1921,6 +1924,7 @@ export default {
   VIOLATION_TYPES,
   VIOLATION_SEVERITY,
   RESTRICTION_TYPES,
+  RESTRICTION_SEVERITY,
   CERTIFICATE_STATES,
   NOTIFICATION_TYPES,
   SEARCH_TYPES,

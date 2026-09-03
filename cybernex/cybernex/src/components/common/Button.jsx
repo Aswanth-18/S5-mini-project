@@ -13,7 +13,8 @@ import { useTheme } from '../../contexts/ThemeContext';
  * @param {React.ReactNode} props.children - Button content
  * @param {function} props.onClick - Click handler
  * @param {string} props.type - Button type (button, submit, reset)
- * @param {object} props - All other button props
+ * @param {React.ReactNode} props.startIcon - Icon to display at the start
+ * @param {React.ReactNode} props.endIcon - Icon to display at the end
  * @returns {JSX.Element} - Button component
  */
 const Button = ({
@@ -25,6 +26,8 @@ const Button = ({
   children,
   onClick,
   type = 'button',
+  startIcon,
+  endIcon,
   ...props
 }) => {
   const { isDarkMode } = useTheme();
@@ -96,7 +99,11 @@ const Button = ({
           {children}
         </>
       ) : (
-        children
+        <>
+          {startIcon && <span className="mr-2">{startIcon}</span>}
+          {children}
+          {endIcon && <span className="ml-2">{endIcon}</span>}
+        </>
       )}
     </button>
   );

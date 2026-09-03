@@ -1,0 +1,184 @@
+/**
+ * CyberNex - Component Styles
+ * Hand-written styles for visuals beyond comfortable Tailwind utility
+ * strings: terminal, security-score ring, timeline, stat cards, flag
+ * input states, violation banner, skeleton loaders.
+ */
+
+/* ===== TERMINAL ===== */
+.cybernex-terminal {
+  position: relative;
+  background: #0b1220;
+  color: #34d399;
+  border-radius: var(--radius-md);
+  border: 1px solid #1f2937;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  padding: var(--space-4);
+}
+
+.cybernex-terminal__line {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.cybernex-terminal__prompt::before {
+  content: '$ ';
+  color: #60a5fa;
+}
+
+.cybernex-terminal__cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1em;
+  background: #34d399;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: cybernex-blink 1s step-end infinite;
+}
+
+@keyframes cybernex-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ===== SECURITY SCORE RING ===== */
+.score-ring {
+  --score: 0; /* set inline via style, 0-100 */
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--color-primary) calc(var(--score) * 1%), var(--bg-muted) 0);
+}
+
+.score-ring__inner {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  display: grid;
+  place-items: center;
+  flex-direction: column;
+}
+
+.score-ring__value {
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ===== VERTICAL TIMELINE ===== */
+.timeline {
+  position: relative;
+  margin-left: var(--space-3);
+  padding-left: var(--space-6);
+  border-left: 2px solid var(--border-color);
+}
+
+.timeline__item {
+  position: relative;
+  padding-bottom: var(--space-6);
+}
+.timeline__item:last-child { padding-bottom: 0; }
+
+.timeline__dot {
+  position: absolute;
+  left: calc(-1 * var(--space-6) - 5px);
+  top: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 2px solid var(--bg-surface);
+}
+.timeline__dot--success { background: var(--color-success); }
+.timeline__dot--warning { background: var(--color-warning); }
+.timeline__dot--danger { background: var(--color-danger); }
+
+/* ===== STAT CARD ===== */
+.stat-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  transition: box-shadow var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard);
+}
+.stat-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.stat-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.stat-card__value {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.stat-card__label {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+
+.stat-card__trend { font-size: var(--fs-xs); font-weight: 600; }
+.stat-card__trend--up { color: var(--color-success); }
+.stat-card__trend--down { color: var(--color-danger); }
+
+/* ===== FLAG SUBMISSION INPUT ===== */
+.flag-input {
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+.flag-input--correct {
+  border-color: var(--color-success) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+.flag-input--incorrect {
+  border-color: var(--color-danger) !important;
+  animation: cybernex-shake 0.3s var(--ease-standard);
+}
+@keyframes cybernex-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+/* ===== VIOLATION / RESTRICTED OVERLAY ===== */
+.violation-banner {
+  border-left: 4px solid var(--color-danger);
+  background: rgba(239, 68, 68, 0.08);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+/* ===== SKELETON LOADING ===== */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-muted) 25%, var(--bg-surface-alt) 37%, var(--bg-muted) 63%);
+  background-size: 400% 100%;
+  animation: cybernex-skeleton 1.4s ease infinite;
+  border-radius: var(--radius-sm);
+}
+@keyframes cybernex-skeleton {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}

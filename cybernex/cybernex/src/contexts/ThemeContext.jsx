@@ -6,7 +6,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 const ThemeContext = createContext(null);
 
 // ===== PROVIDER COMPONENT =====
-export const ThemeProvider = ({ children }) => {
+const ThemeProvider = ({ children }) => {
   const [theme, setThemeState] = useLocalStorage('theme', 'system');
   const [systemTheme, setSystemTheme] = useState('light');
 
@@ -76,7 +76,7 @@ export const ThemeProvider = ({ children }) => {
 };
 
 // ===== CUSTOM HOOK =====
-export const useTheme = () => {
+const useTheme = () => {
   const context = useContext(ThemeContext);
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');
@@ -85,5 +85,5 @@ export const useTheme = () => {
 };
 
 // ===== EXPORT =====
-export default ThemeContext;
 export { ThemeProvider, useTheme };
+export default ThemeContext;

@@ -10,7 +10,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 const AuthContext = createContext(null);
 
 // ===== PROVIDER COMPONENT =====
-export const AuthProvider = ({ children }) => {
+const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -282,7 +282,7 @@ export const AuthProvider = ({ children }) => {
 };
 
 // ===== CUSTOM HOOK =====
-export const useAuth = () => {
+const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
@@ -291,5 +291,5 @@ export const useAuth = () => {
 };
 
 // ===== EXPORT =====
-export default AuthContext;
 export { AuthProvider, useAuth };
+export default AuthContext;

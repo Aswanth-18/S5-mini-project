@@ -28,7 +28,7 @@ import { ROLES, ASSESSMENT_STATES } from '../utils/constants';
 const DataContext = createContext(null);
 
 // ===== PROVIDER COMPONENT =====
-export const DataProvider = ({ children }) => {
+const DataProvider = ({ children }) => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -2142,7 +2142,7 @@ export const DataProvider = ({ children }) => {
  * Custom hook to use the DataContext
  * @returns {object} - Data context value
  */
-export const useData = () => {
+const useData = () => {
   const context = useContext(DataContext);
   if (context === undefined) {
     throw new Error('useData must be used within a DataProvider');
@@ -2151,5 +2151,5 @@ export const useData = () => {
 };
 
 // ===== EXPORT =====
+export { DataProvider, useData };
 export default DataContext;
-export { DataProvider, useData }; 

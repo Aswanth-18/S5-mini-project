@@ -1,0 +1,136 @@
+/**
+ * CyberNex - Layout Primitives
+ * Structural CSS for the app shell (sidebar + topnav + content grid)
+ * shared by AdminLayout / FacultyLayout / StudentLayout / SharedLayout.
+ */
+
+.app-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-rows: var(--topnav-height) 1fr;
+  grid-template-areas:
+    'sidebar topnav'
+    'sidebar main';
+  min-height: 100vh;
+  background-color: var(--bg-app);
+  transition: grid-template-columns var(--duration-base) var(--ease-standard);
+}
+
+.app-shell--collapsed {
+  grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+}
+
+.app-shell__sidebar {
+  grid-area: sidebar;
+  border-right: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+  overflow-y: auto;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: var(--z-sidebar);
+}
+
+.app-shell__topnav {
+  grid-area: topnav;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-surface);
+  display: flex;
+  align-items: center;
+  padding-inline: var(--space-6);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-topnav);
+}
+
+.app-shell__main {
+  grid-area: main;
+  overflow-y: auto;
+  padding: var(--space-6);
+}
+
+.app-shell__content {
+  max-width: var(--content-max-width);
+  margin-inline: auto;
+  width: 100%;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.page-header__title {
+  font-size: var(--fs-2xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.page-header__subtitle {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
+}
+
+.page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.page-section {
+  margin-bottom: var(--space-8);
+}
+.page-section + .page-section {
+  padding-top: var(--space-6);
+}
+
+.grid-cards {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.grid-stats {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.split-view {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .grid-stats { grid-template-columns: repeat(2, 1fr); }
+  .split-view { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+    grid-template-areas: 'topnav' 'main';
+  }
+  .app-shell__sidebar {
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    transform: translateX(-100%);
+    transition: transform var(--duration-base) var(--ease-standard);
+    box-shadow: var(--shadow-lg);
+  }
+  .app-shell__sidebar--open {
+    transform: translateX(0);
+  }
+  .grid-stats { grid-template-columns: 1fr; }
+  .page-header { flex-direction: column; align-items: stretch; }
+}

@@ -72,7 +72,7 @@ import { createContext, useContext } from 'react';
 
 const ToastContext = createContext(null);
 
-export const ToastProvider = ({ children, position = 'top-right' }) => {
+const ToastProvider = ({ children, position = 'top-right' }) => {
   const [container, setContainer] = useState(null);
 
   // Add toast to the container
@@ -167,7 +167,7 @@ export const ToastProvider = ({ children, position = 'top-right' }) => {
 /**
  * Hook for using toasts in components
  */
-export const useToast = () => {
+const useToast = () => {
   const context = useContext(ToastContext);
   if (context === undefined) {
     throw new Error('useToast must be used within a ToastProvider');

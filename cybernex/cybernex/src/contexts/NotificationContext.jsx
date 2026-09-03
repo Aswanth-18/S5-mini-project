@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { genUUID } from '../utils/helpers';
 
 // ===== CREATE CONTEXT =====
 const NotificationContext = createContext(null);
@@ -105,7 +105,7 @@ const NotificationItem = ({ notification, onDismiss, position = 'top-right' }) =
 };
 
 // ===== PROVIDER COMPONENT =====
-export const NotificationProvider = ({ children, position = 'top-right' }) => {
+const NotificationProvider = ({ children, position = 'top-right' }) => {
   const [notifications, setNotifications] = useState([]);
   const [storedNotifications] = useLocalStorage('notifications', []);
 
@@ -114,14 +114,14 @@ export const NotificationProvider = ({ children, position = 'top-right' }) => {
     if (storedNotifications.length > 0) {
       setNotifications(storedNotifications.map(n => ({
         ...n,
-        id: n.id || uuidv4()
+        id: n.id || genUUID()
       })));
     }
   }, [storedNotifications]);
 
   // Add notification
   const addNotification = useCallback((notification) => {
-    const id = uuidv4();
+    const id = genUUID();
     const newNotification = {
       id,
       type: 'info',
@@ -243,7 +243,7 @@ export const NotificationProvider = ({ children, position = 'top-right' }) => {
 };
 
 // ===== CUSTOM HOOK =====
-export const useNotifications = () => {
+const useNotifications = () => {
   const context = useContext(NotificationContext);
   if (context === undefined) {
     throw new Error('useNotifications must be used within a NotificationProvider');
@@ -252,5 +252,5 @@ export const useNotifications = () => {
 };
 
 // ===== EXPORT =====
-export default NotificationContext;
 export { NotificationProvider, useNotifications };
+export default NotificationContext;

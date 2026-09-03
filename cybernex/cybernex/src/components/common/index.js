@@ -20,3 +20,4 @@ export { default as Avatar } from './Avatar';
 export { default as RoleBadge } from './RoleBadge';
 export { default as Dropdown } from './Dropdown';
 export { default as DataTable } from './DataTable';
+export { default as Switch } from './Switch';

@@ -1,0 +1,30 @@
+<svg width="160" height="40" viewBox="0 0 160 40" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="cybernexLogoTitle">
+  <title id="cybernexLogoTitle">CyberNex</title>
+  <defs>
+    <linearGradient id="cybernexMark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+  </defs>
+
+  <!-- Shield mark -->
+  <g transform="translate(2, 4)">
+    <path
+      d="M16 0 L30 5 V15 C30 24.5 24 30.8 16 33 C8 30.8 2 24.5 2 15 V5 Z"
+      fill="url(#cybernexMark)"
+    />
+    <path
+      d="M10.5 16.5 L14 20 L21.5 12"
+      fill="none"
+      stroke="#ffffff"
+      stroke-width="2.6"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </g>
+
+  <!-- Wordmark -->
+  <text x="42" y="26" font-family="Inter, -apple-system, sans-serif" font-size="19" font-weight="700" fill="#111827">
+    Cyber<tspan fill="#2563eb">Nex</tspan>
+  </text>
+</svg>
