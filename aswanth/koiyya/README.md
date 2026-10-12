@@ -1,48 +1,75 @@
 # NovaWire
 
-A responsive React.js news aggregator dashboard built with reusable components and modern CSS.
+NovaWire is a premium digital newsroom and discovery platform built with React, Vite, and SQLite. It includes a polished editorial front end, complete article search, category browsing, an admin workflow, newsletter signup, secure admin login, and a production-ready Express API.
 
-## Features
-- Multi-category newsroom layout
-- Responsive dashboard design
-- Reusable component structure
-- React Hooks-based state and category switching
-- Ready for API integration with MySQL-backed backend
+## Stack
+- Frontend: React + Vite + Framer Motion
+- Backend: Express + SQLite
+- Auth: JWT-based admin auth for protected admin actions
+- Data: SQLite with migration-style schema initialization and deterministic seed data
 
-## Run locally
+## Local setup
 
-1. Install dependencies:
+1. Copy the environment file:
    ```bash
+   cp .env.example .env
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
    npm install --prefix server
    npm install --prefix client
    ```
-2. Start backend and frontend together:
+3. Run both processes:
    ```bash
-   cd /home/mathan/Desktop/aswanth/koiyya
    npm run dev
    ```
-3. Open the frontend at http://localhost:5173
+4. Open:
+   - Frontend: http://localhost:5173
+   - API: http://localhost:5000/api/health
 
-## MySQL config
-Copy `.env.example` to `.env` and update database values:
+## Admin access
 
-```bash
-cp .env.example .env
+The app bootstraps an admin user from environment values when the password is configured. In local development, the default values are:
+
+```env
+ADMIN_EMAIL=admin@novawire.local
+ADMIN_PASSWORD=admin123
 ```
 
-For Railway, add a `DATABASE_URL` variable or set your DB values in the deployment environment.
+For production, set a unique password and JWT secret in your hosting environment instead of committing them.
 
-## Railway deployment notes
-- Install the CLI: `npm i -g @railway/cli`
-- Log in: `railway login`
-- Link the project: `railway link`
-- Add variables from `.env.example`
-- Deploy the service using the Railway UI or CLI
+## Available scripts
 
-## Technical stack
-- React.js
-- JavaScript (ES6+)
-- CSS3
-- Reusable components
-- React Hooks
-- Responsive design
+```bash
+npm run dev       # start backend + frontend together
+npm run server    # start only the Express server
+npm run client    # start only the Vite frontend
+npm run build     # production frontend build
+npm --prefix server test   # backend tests
+```
+
+## API overview
+
+- `GET /api/health` — service and database status
+- `GET /api/articles` — paginated, searchable, sortable article feed
+- `GET /api/search` — debounced article search
+- `GET /api/categories` — category index
+- `GET /api/categories/:slug` — category detail with stories
+- `GET /api/articles/:id` — article fetch by ID or slug
+- `POST /api/newsletter/subscribe` — newsletter signup
+- `POST /api/admin/login` — admin authentication
+- `POST /api/admin/articles` — create article
+- `PUT /api/admin/articles/:id` — update article
+- `DELETE /api/admin/articles/:id` — delete article
+
+## Database notes
+
+The current implementation uses SQLite to keep local development simple while still providing reliable initial schema creation, indexes, and seeded demo content. The database file lives in `server/data/newsroom.db`.
+
+## Deployment notes
+
+- Keep secrets in the server environment, not in source control.
+- Use a persistent filesystem for the SQLite database in production.
+- Ensure the app runs with a secure admin password and long JWT secret.
+- Use a reverse proxy or hosting service that keeps the API and frontend behind the same domain if you want stricter CSP and cookie handling.
