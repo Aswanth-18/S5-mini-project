@@ -1,17 +1,13 @@
 export const supportedLanguages = [
   { value: 'en', label: 'English' },
-  { value: 'ml', label: 'മലയാളം' },
   { value: 'ta', label: 'தமிழ்' },
   { value: 'hi', label: 'हिन्दी' },
-  { value: 'te', label: 'తెలుగు' },
 ];
 
 export const navLabels = {
   en: ['Home', 'World', 'Business', 'Politics', 'Tech', 'Culture', 'Climate', 'Analysis'],
-  ml: ['ഹോം', 'ലോകം', 'വാണിജ്യം', 'രാഷ്ട്രീയം', 'ത്വരിതം', 'സാംസ്കാരികം', 'കാലാവസ്ഥ', 'വിശകലനം'],
   ta: ['முகப்பு', 'உலகம்', 'வணிகம்', 'அரசியல்', 'தொழில்நுட்பம்', 'கலாச்சாரம்', 'காலநிலை', 'பகுப்பாய்வு'],
   hi: ['होम', 'दुनिया', 'व्यवसाय', 'राजनीति', 'टेक', 'संस्कृति', 'जलवायु', 'विश्लेषण'],
-  te: ['హోమ్', 'ప్రపంచం', 'వ్యవసాయం', 'రాజకీయాలు', 'టెక్', 'సాంస్కృతికం', 'వాతావరణం', 'విశ్లేషణ'],
 };
 
 const articleTranslations = {
@@ -159,6 +155,59 @@ const articleTranslations = {
   },
 };
 
+export const categoryLabels = {
+  en: {
+    Home: 'Home',
+    World: 'World',
+    Business: 'Business',
+    Politics: 'Politics',
+    Tech: 'Tech',
+    Culture: 'Culture',
+    Climate: 'Climate',
+    Analysis: 'Analysis',
+  },
+  ml: {
+    Home: 'ഹോം',
+    World: 'ലോകം',
+    Business: 'വാണിജ്യം',
+    Politics: 'രാഷ്ട്രീയം',
+    Tech: 'ത്വരിതം',
+    Culture: 'സാംസ്കാരികം',
+    Climate: 'കാലാവസ്ഥ',
+    Analysis: 'വിശകലനം',
+  },
+  ta: {
+    Home: 'முகப்பு',
+    World: 'உலகம்',
+    Business: 'வணிகம்',
+    Politics: 'அரசியல்',
+    Tech: 'தொழில்நுட்பம்',
+    Culture: 'கலாச்சாரம்',
+    Climate: 'காலநிலை',
+    Analysis: 'பகுப்பாய்வு',
+  },
+  hi: {
+    Home: 'होम',
+    World: 'दुनिया',
+    Business: 'व्यवसाय',
+    Politics: 'राजनीति',
+    Tech: 'टेक',
+    Culture: 'संस्कृति',
+    Climate: 'जलवायु',
+    Analysis: 'विश्लेषण',
+  },
+  te: {
+    Home: 'హోమ్',
+    World: 'ప్రపంచం',
+    Business: 'వ్యవసాయం',
+    Politics: 'రాజకీయాలు',
+    Tech: 'టెక్',
+    Culture: 'సాంస్కృతికం',
+    Climate: 'వాతావరణం',
+    Analysis: 'విశ్లేషణ',
+  },
+};
+
 export const uiText = {
   en: {
     admin: 'Admin',
@@ -167,23 +216,23 @@ export const uiText = {
     menu: 'Menu',
     close: 'Close',
     live: 'Live',
-    readLead: 'Read the lead',
-    browseLatest: 'Browse latest',
+    readLead: 'Read live lead',
+    browseLatest: 'Browse live updates',
     trending: 'Trending',
     topics: 'Topics',
     coverageMap: 'Coverage map',
-    todaysNewsroom: 'Today’s newsroom',
-    latest: 'Latest',
-    topStories: 'Top stories',
+    todaysNewsroom: 'Live desk',
+    latest: 'Live latest',
+    topStories: 'Live stories',
     whatMattersNow: 'What matters now',
-    briefing: 'Briefing',
-    editorsPick: 'Editor’s pick',
-    deepReads: 'Deep reads',
-    marketPulse: 'Market pulse',
+    briefing: 'Live briefing',
+    editorsPick: 'Editor’s live pick',
+    deepReads: 'Live reads',
+    marketPulse: 'Live market pulse',
     markets: 'Markets',
-    climateBrief: 'Climate brief',
-    resilienceWatch: 'Resilience watch',
-    morningBrief: 'Morning brief',
+    climateBrief: 'Live climate brief',
+    resilienceWatch: 'Live resilience watch',
+    morningBrief: 'Live brief',
     searchStories: 'Search stories',
     searchPlaceholder: 'Search stories, topics, or people...',
     readStory: 'Read story',
@@ -438,17 +487,81 @@ const normalizeTranslationKey = (title = '') => String(title)
   .trim()
   .replace(/\s+/g, ' ');
 
+const stripSlugSuffix = (value = '') => {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  return text.replace(/-(?:\d{13}|\d+)-[a-z0-9]+$/, '');
+};
+
+const slugifyText = (value = '') => String(value || '')
+  .trim()
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '')
+  .replace(/-+/g, '-');
+
+const getStableArticleKey = (article = {}) => {
+  const slug = String(article.slug || '').trim();
+  if (slug) {
+    const normalizedSlug = stripSlugSuffix(slug);
+    return normalizedSlug || slug;
+  }
+
+  if (article.id !== undefined && article.id !== null && String(article.id).trim()) {
+    return `id:${article.id}`;
+  }
+
+  return normalizeTranslationKey(article.title || '');
+};
+
+const buildArticleTranslationIndex = () => {
+  const entries = {};
+
+  Object.entries(articleTranslations).forEach(([key, value]) => {
+    if (!value) return;
+    const normalizedKey = normalizeTranslationKey(key);
+    entries[normalizedKey] = value;
+
+    const slugKey = slugifyText(key);
+    if (slugKey) entries[slugKey] = value;
+  });
+
+  return entries;
+};
+
+const articleTranslationIndex = buildArticleTranslationIndex();
+
 export const getLanguageText = (language, key, fallback = '') => {
   const text = uiText[language]?.[key];
   return text || uiText.en[key] || fallback;
 };
 
+export const translateCategoryName = (category, language = 'en') => {
+  const label = String(category || '').trim();
+  if (!label) return '';
+  const localeMap = categoryLabels[language] || categoryLabels.en;
+  return localeMap[label] || categoryLabels.en[label] || label;
+};
+
 export function localizeArticle(article, language = 'en') {
-  if (!article || language === 'en') return article;
-  const key = normalizeTranslationKey(article.title);
-  const localeMap = articleTranslations[key] || articleTranslations[article.title];
+  if (!article) return article;
+  if (language === 'en') {
+    return {
+      ...article,
+      translationStatus: 'none',
+    };
+  }
+
+  const lookupKey = getStableArticleKey(article);
+  const localeMap = articleTranslationIndex[lookupKey] || articleTranslationIndex[normalizeTranslationKey(article.title || '')] || articleTranslationIndex[String(article.title || '')];
   const translation = localeMap?.[language] || null;
-  if (!translation) return article;
+
+  if (!translation) {
+    return {
+      ...article,
+      translationStatus: 'missing',
+    };
+  }
 
   return {
     ...article,
@@ -457,6 +570,7 @@ export function localizeArticle(article, language = 'en') {
     content: Array.isArray(translation.content) && translation.content.length ? translation.content : article.content,
     author: translation.author || article.author,
     readTime: translation.readTime || article.readTime,
+    translationStatus: 'translated',
   };
 }
 

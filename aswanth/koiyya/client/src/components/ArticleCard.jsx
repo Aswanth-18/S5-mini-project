@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
+import { translateCategoryName, uiText } from '../i18n';
 import { formatDate } from '../services/api';
 
 function getTone(category) {
@@ -17,9 +18,10 @@ function getTone(category) {
   return tones[String(category || 'Home')] || 'cyan';
 }
 
-export default function ArticleCard({ article, index = 0 }) {
+export default function ArticleCard({ article, index = 0, language = 'en' }) {
   const navigate = useNavigate();
   const href = article.slug ? `/article/${article.slug}` : `/article/${article.id}`;
+  const t = uiText[language] || uiText.en;
 
   const handleOpen = () => navigate(href);
   const handleKeyDown = (event) => {
@@ -50,7 +52,8 @@ export default function ArticleCard({ article, index = 0 }) {
 
       <div className="story-body">
         <div className="story-card-topline">
-          <span className={`story-badge ${getTone(article.category)}`}>{article.category}</span>
+          <span className={`story-badge ${getTone(article.category)}`}>{translateCategoryName(article.category, language)}</span>
+          <span className="story-badge live">LIVE</span>
           <span>{article.readTime || '5 min read'}</span>
         </div>
 
@@ -62,7 +65,7 @@ export default function ArticleCard({ article, index = 0 }) {
           <span>{formatDate(article.publishedAt)}</span>
         </div>
 
-        <Link to={href} className="story-link" onClick={(event) => event.stopPropagation()}>Read story</Link>
+        <Link to={href} className="story-link" onClick={(event) => event.stopPropagation()}>{t.readStory}</Link>
       </div>
     </motion.article>
   );

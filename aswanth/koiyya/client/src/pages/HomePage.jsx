@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import ArticleCard from '../components/ArticleCard';
-import { uiText } from '../i18n';
-import { formatDate } from '../services/api';
+import { translateCategoryName, uiText } from '../i18n';
+import { fetchJson, formatDate } from '../services/api';
 
 const marketData = [
   { name: 'S&P 500', value: '5,436.19', delta: '+1.42%' },
@@ -16,12 +17,23 @@ const marketData = [
 ];
 
 const categoryCoverage = ['World', 'Business', 'Politics', 'Tech', 'Culture', 'Climate', 'Analysis'];
+const NEWSDATA_LIVE_NEWS_URL = 'https://newsdata.io/api/1/latest?apikey=pub_cafbc04982c14ebeb9c429533f5cd8b6';
+const fallbackLiveNews = [];
 
 export default function HomePage({ articles, language = 'en' }) {
+  const [liveNews, setLiveNews] = useState([]);
   const t = uiText[language] || uiText.en;
   const lead = articles.find((item) => item.featured) || articles[0];
   const stories = articles.slice(0, 6);
   const featured = articles.slice(0, 4);
+  const localizedCategoryCoverage = categoryCoverage.map((category) => ({
+    key: category,
+    label: translateCategoryName(category, language),
+  }));
+  const tickerItems = useMemo(() => {
+    const source = liveNews.length ? liveNews : (articles || []).map((item) => item?.title || '').filter(Boolean);
+    return source.map((item) => (typeof item === 'string' ? item : item?.title || item?.description || '')).filter(Boolean).slice(0, 6);
+  }, [articles, liveNews]);
   const trendingTopics = [
     t.aiInfrastructure,
     t.globalEconomy,
@@ -30,6 +42,32 @@ export default function HomePage({ articles, language = 'en' }) {
     t.sportsAnalytics,
     t.culturalShifts,
   ];
+
+  useEffect(() => {
+    let active = true;
+
+    const loadLiveNews = async () => {
+      try {
+        const payload = await fetchJson(NEWSDATA_LIVE_NEWS_URL);
+        const headlines = Array.isArray(payload?.results) ? payload.results : [];
+        const next = headlines
+          .map((item) => item?.title || item?.description)
+          .filter(Boolean)
+          .slice(0, 6);
+
+        if (active) {
+          setLiveNews(next.length ? next : (articles || []).map((item) => item?.title || '').filter(Boolean).slice(0, 6));
+        }
+      } catch (error) {
+        if (active) {
+          setLiveNews((articles || []).map((item) => item?.title || '').filter(Boolean).slice(0, 6));
+        }
+      }
+    };
+
+    loadLiveNews();
+    return () => { active = false; };
+  }, [articles]);
 
   if (!lead) {
     return <div className="empty-state">{t.noArticles}</div>;
@@ -47,9 +85,9 @@ export default function HomePage({ articles, language = 'en' }) {
       <div className="ticker-bar">
         <span className="ticker-label">{t.live}</span>
         <div className="ticker-track">
-          <span>AI infrastructure spending expands across emerging markets</span>
-          <span>Public resilience investment accelerates across coastal cities</span>
-          <span>Editorial teams focus on trust, context, and local accountability</span>
+          {tickerItems.map((item, index) => (
+            <span key={`${item}-${index}`}>{item}</span>
+          ))}
         </div>
       </div>
 
@@ -151,13 +189,13 @@ export default function HomePage({ articles, language = 'en' }) {
         </div>
 
         <div className="section-grid highlight-grid">
-          {categoryCoverage.map((category) => {
-            const count = articles.filter((item) => item.category === category).length;
+          {localizedCategoryCoverage.map(({ key, label }) => {
+            const count = articles.filter((item) => item.category === key).length;
             return (
-              <Link key={category} to={`/category/${category.toLowerCase()}`} className="coverage-card">
-                <span>{category}</span>
-                <strong>{category}</strong>
-                <small>{count} reports</small>
+              <Link key={key} to={`/category/${key.toLowerCase()}`} className="coverage-card">
+                <span>{label}</span>
+                <strong>{label}</strong>
+                <small>{count} {t.topics}</small>
               </Link>
             );
           })}
@@ -173,7 +211,7 @@ export default function HomePage({ articles, language = 'en' }) {
 
           <div className="story-grid">
             {stories.map((article, index) => (
-              <ArticleCard key={article.id} article={article} index={index} />
+              <ArticleCard key={article.id} article={article} index={index} language={language} />
             ))}
           </div>
         </div>
@@ -187,7 +225,7 @@ export default function HomePage({ articles, language = 'en' }) {
             <div className="brief-list">
               {featured.map((item) => (
                 <div key={item.id} className="brief-item">
-                  <span className="brief-tag">{item.category}</span>
+                  <span className="brief-tag">{translateCategoryName(item.category, language)}</span>
                   <div>
                     <h4>{item.title}</h4>
                     <small>{formatDate(item.publishedAt)}</small>

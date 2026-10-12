@@ -122,7 +122,7 @@ export default function AdminPage() {
         <div className="admin-login-box">
           <div className="section-heading">
             <span className="eyebrow">Admin access</span>
-            <h2>Fresh News secure login</h2>
+            <h2>Live News secure login</h2>
           </div>
           <form className="admin-login-form" onSubmit={handleLogin}>
             <input type="email" value={login.email} onChange={(event) => setLogin((current) => ({ ...current, email: event.target.value }))} placeholder="Email" required />

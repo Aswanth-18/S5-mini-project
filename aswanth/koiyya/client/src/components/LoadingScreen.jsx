@@ -7,12 +7,12 @@ export default function LoadingScreen() {
         className="brand-loader"
         initial={{ opacity: 0, scale: 0.9, rotate: -6 }}
         animate={{ opacity: 1, scale: 1, rotate: 0 }}
-        transition={{ duration: 0.7, ease: 'easeOut' }}
+        transition={{ duration:1.5, ease: 'easeOut' }}
       >
-        <span className="loader-mark">F</span>
+        <h2 className="loader-mark">L</h2>
         <div>
-          <p>Fresh News</p>
-          <span>Live newsroom</span>
+          <p>Live News</p>
+          <span>Live desk</span>
         </div>
       </motion.div>
 
@@ -20,7 +20,7 @@ export default function LoadingScreen() {
         className="loading-bar"
         initial={{ width: 0 }}
         animate={{ width: '100%' }}
-        transition={{ duration: 1.1, ease: 'easeInOut' }}
+        transition={{ duration: 2, ease: 'easeInOut' }}
       />
     </div>
   );

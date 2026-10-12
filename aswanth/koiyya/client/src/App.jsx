@@ -8,22 +8,32 @@ import SearchPage from './pages/SearchPage';
 import ArticlePage from './pages/ArticlePage';
 import AdminPage from './pages/AdminPage';
 import NotFoundPage from './pages/NotFoundPage';
-import { localizeArticles } from './i18n';
+import { localizeArticles, supportedLanguages } from './i18n';
 import { API_BASE, fetchJson } from './services/api';
+
+const allowedLanguages = new Set(supportedLanguages.map((language) => language.value));
 
 function App() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [loadingScreen, setLoadingScreen] = useState(true);
-  const [language, setLanguage] = useState(() => localStorage.getItem('freshnews_language') || 'en');
+  const [language, setLanguage] = useState(() => {
+    const saved = localStorage.getItem('freshnews_language');
+    return allowedLanguages.has(saved) ? saved : 'en';
+  });
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setLoadingScreen(false), 900);
+    const timer = window.setTimeout(() => setLoadingScreen(false), 2000);
     return () => window.clearTimeout(timer);
   }, []);
 
   useEffect(() => {
+    if (!allowedLanguages.has(language)) {
+      setLanguage('en');
+      return;
+    }
+
     localStorage.setItem('freshnews_language', language);
   }, [language]);
 

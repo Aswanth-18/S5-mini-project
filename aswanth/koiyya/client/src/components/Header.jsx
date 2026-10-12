@@ -58,11 +58,11 @@ export default function Header({ language = 'en', setLanguage }) {
     <>
       <header className={`topbar ${isHome ? 'topbar-home' : ''}`}>
         <div className="topbar-inner">
-          <Link to="/" className="brand-block" aria-label="Fresh News home">
-            <span className="brand-mark">F</span>
+          <Link to="/" className="brand-block" aria-label="Live News home">
+            <span className="brand-mark">L</span>
             <div>
-              <p className="brand-name">Fresh News</p>
-              <span className="brand-subtitle">daily brief</span>
+              <p className="brand-name">Live News</p>
+              <span className="brand-subtitle">live brief</span>
             </div>
           </Link>
 
