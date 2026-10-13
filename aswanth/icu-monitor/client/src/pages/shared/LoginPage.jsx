@@ -22,42 +22,74 @@ export default function LoginPage() {
       const user = await login(email, password);
       toast.success(`Welcome, ${user.name}`);
       navigate(homeFor(user.role));
-    } catch { /* error from store */ }
+    } catch {
+      // handled by store
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,#eff6ff_0%,#f8fafc_38%,#edf2f7_100%)] px-4 py-12">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="text-5xl mb-2">🫀</div>
-          <h1 className="text-3xl font-bold">ICU Monitor</h1>
-          <p className="text-slate-400 mt-1">AI-Driven Critical Patient Monitoring</p>
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-lg font-bold text-blue-700 shadow-sm">
+            ICU
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">ICU Monitor</h1>
+          <p className="mt-2 text-sm text-slate-600">Clinical operations and patient monitoring dashboard</p>
         </div>
-        <form onSubmit={submit} className="bg-slate-800 p-8 rounded-2xl border border-slate-700 space-y-4">
+
+        <form onSubmit={submit} className="panel space-y-5 p-6 sm:p-8">
           <div>
-            <label className="block text-sm text-slate-400 mb-1">Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500"
-              placeholder="you@icu.local" />
+            <label className="mb-2 block text-sm font-medium text-slate-700">Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="input-shell"
+              placeholder="you@icu.local"
+            />
           </div>
+
           <div>
-            <label className="block text-sm text-slate-400 mb-1">Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
-              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 focus:outline-none focus:border-blue-500"
-              placeholder="••••••••" />
+            <label className="mb-2 block text-sm font-medium text-slate-700">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="input-shell"
+              placeholder="Enter password"
+            />
           </div>
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-          <button type="submit" disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 rounded-lg py-2.5 font-semibold transition">
-            {loading ? 'Signing in…' : 'Sign In'}
+
+          {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
-          <div className="pt-3 border-t border-slate-700">
-            <p className="text-xs text-slate-500 mb-2 text-center">Demo accounts (click to fill):</p>
+
+          <div className="border-t border-slate-200 pt-4">
+            <p className="mb-3 text-center text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+              Demo accounts
+            </p>
             <div className="grid grid-cols-3 gap-2">
               {DEMO.map((d) => (
-                <button key={d.label} type="button"
-                  onClick={() => { setEmail(d.email); setPassword(d.pass); }}
-                  className="text-xs bg-slate-700 hover:bg-slate-600 rounded-lg py-2 transition">{d.label}</button>
+                <button
+                  key={d.label}
+                  type="button"
+                  onClick={() => {
+                    setEmail(d.email);
+                    setPassword(d.pass);
+                  }}
+                  className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-2 text-xs font-medium text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                >
+                  {d.label}
+                </button>
               ))}
             </div>
           </div>

@@ -26,7 +26,7 @@ export default function VitalsEntryPage() {
     if (!patientId) return toast.error('Select a patient');
     setBusy(true);
     try {
-      const { vital, alerts } = await addVitals(patientId, form);
+      const { alerts } = await addVitals(patientId, form);
       toast.success(`Saved. ${alerts.length} alert(s) generated.`);
       setForm({});
     } catch { toast.error('Failed to save vitals'); }

@@ -2,9 +2,36 @@ import { create } from 'zustand';
 import { login as loginApi } from '../services/authApi';
 import { connectSocket, disconnectSocket } from '../services/socket';
 
+const readStoredUser = () => {
+  try {
+    const stored = localStorage.getItem('user');
+    if (!stored) return null;
+    const parsed = JSON.parse(stored);
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+const clearStoredSession = () => {
+  try {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('auth_snapshot');
+  } catch {
+    // Ignore storage exceptions in restricted browser modes.
+  }
+};
+
 export const useAuthStore = create((set) => ({
-  user: JSON.parse(localStorage.getItem('user') || 'null'),
-  token: localStorage.getItem('token'),
+  user: readStoredUser(),
+  token: (() => {
+    try {
+      return localStorage.getItem('token');
+    } catch {
+      return null;
+    }
+  })(),
   loading: false,
   error: null,
 
@@ -12,9 +39,15 @@ export const useAuthStore = create((set) => ({
     set({ loading: true, error: null });
     try {
       const { token, user } = await loginApi({ email, password });
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
-      localStorage.setItem('auth_snapshot', JSON.stringify({ token, user }));
+
+      try {
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('auth_snapshot', JSON.stringify({ token, user }));
+      } catch {
+        // Ignore storage exceptions in restricted browser modes.
+      }
+
       set({ token, user, loading: false });
       connectSocket();
       return user;
@@ -25,10 +58,8 @@ export const useAuthStore = create((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('auth_snapshot');
+    clearStoredSession();
     disconnectSocket();
-    set({ user: null, token: null });
+    set({ user: null, token: null, error: null });
   }
 }));

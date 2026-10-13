@@ -10,13 +10,29 @@ exports.getAuditLogs = asyncHandler(async (req, res) => {
 });
 
 exports.getDashboardStats = asyncHandler(async (req, res) => {
-  const [total, critical, active, beds, alerts, resolved] = await Promise.all([
-    Patient.countDocuments(),
+  const [totalPatients, criticalPatients, activePatients, totalBeds, occupiedBeds, activeAlerts, unacknowledgedAlerts, resolvedAlerts] = await Promise.all([
+    Patient.countDocuments({ status: { $ne: 'discharged' } }),
     Patient.countDocuments({ status: 'critical' }),
     Patient.countDocuments({ status: { $ne: 'discharged' } }),
     Bed.countDocuments(),
+    Bed.countDocuments({ isOccupied: true }),
     Alert.countDocuments({ status: 'active' }),
+    Alert.countDocuments({ status: { $in: ['active', 'acknowledged'] } }),
     Alert.countDocuments({ status: 'resolved' })
   ]);
-  res.json({ totalPatients: total, criticalPatients: critical, activePatients: active, totalBeds: beds, activeAlerts: alerts, resolvedAlerts: resolved });
+
+  const occupancyRate = totalBeds ? Number(((occupiedBeds / totalBeds) * 100).toFixed(1)) : 0;
+
+  res.json({
+    totalPatients,
+    criticalPatients,
+    activePatients,
+    totalBeds,
+    occupiedBeds,
+    availableBeds: Math.max(totalBeds - occupiedBeds, 0),
+    occupancyRate,
+    activeAlerts,
+    unacknowledgedAlerts,
+    resolvedAlerts
+  });
 });

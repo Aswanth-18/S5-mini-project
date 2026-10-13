@@ -1,10 +1,26 @@
 import axios from 'axios';
+import { useAuthStore } from '../store/authStore';
 
 const getStoredValue = (key) => {
   try {
     return localStorage.getItem(key);
   } catch {
     return null;
+  }
+};
+
+const clearAuthSession = () => {
+  try {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('auth_snapshot');
+  } catch {
+    // Ignore storage errors while resetting expired sessions.
+  }
+
+  if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+    useAuthStore.getState().logout();
+    window.location.href = '/login';
   }
 };
 
@@ -20,15 +36,7 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      try {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('auth_snapshot');
-      } catch {}
-
-      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
-      }
+      clearAuthSession();
     }
 
     if (!err.response) {

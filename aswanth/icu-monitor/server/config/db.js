@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const connectDB = async () => {
   const uri = process.env.MONGO_URI;
   if (!uri) {
-    console.warn('⚠️ No MONGO_URI set. Server will continue in degraded mode without MongoDB.');
-    return false;
+    throw new Error('MONGO_URI is required. Set it in server/.env using the values from .env.example.');
   }
 
   try {
@@ -13,10 +12,10 @@ const connectDB = async () => {
       autoIndex: true
     });
     console.log(`✅ MongoDB connected: ${conn.connection.host}/${conn.connection.name}`);
-    return true;
+    return conn;
   } catch (err) {
     console.error('❌ MongoDB connection error:', err.message);
-    return false;
+    throw err;
   }
 };
 

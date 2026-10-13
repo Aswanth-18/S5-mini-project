@@ -1,4 +1,4 @@
-/* Run: npm run seed  (from server folder) */
+/* Run: npm run seed  (local demo data; no destructive reset) */
 require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('../models/User');
@@ -10,76 +10,101 @@ const Threshold = require('../models/Threshold');
 
 const rand = (min, max) => min + Math.random() * (max - min);
 
+const demoUsers = [
+  { name: 'Admin Mathan', email: 'admin@icu.local', password: 'admin123', role: 'admin' },
+  { name: 'Dr. Ravi Kumar', email: 'ravi@icu.local', password: 'doctor123', role: 'doctor', specialization: 'Critical Care' },
+  { name: 'Dr. Priya Nair', email: 'priya@icu.local', password: 'doctor123', role: 'doctor', specialization: 'Cardiology' },
+  { name: 'Nurse Anitha', email: 'anu@icu.local', password: 'nurse123', role: 'nurse' },
+  { name: 'Nurse Kumar', email: 'kumar@icu.local', password: 'nurse123', role: 'nurse' }
+];
+
+const upsertUser = async (payload) => {
+  const existing = await User.findOne({ email: payload.email.toLowerCase() });
+  if (existing) {
+    Object.assign(existing, payload);
+    await existing.save();
+    return existing;
+  }
+  return User.create(payload);
+};
+
 const seed = async () => {
+  if (!process.env.MONGO_URI) {
+    throw new Error('MONGO_URI is required before running the seed script.');
+  }
+
   await mongoose.connect(process.env.MONGO_URI);
-  console.log('🌱 Seeding...');
+  console.log('🌱 Preparing idempotent demo seed...');
 
-  // Wipe existing demo data
-  await Promise.all([User, Patient, Bed, Vital, Alert, Threshold].map(M => M.deleteMany()));
+  const [admin, drRavi, drPriya, nurseAnu, nurseKumar] = await Promise.all(demoUsers.map(upsertUser));
 
-  // --- Users ---
-  const [admin, drRavi, drPriya, nurseAnu, nurseKumar] = await User.create([
-    { name: 'Admin Mathan', email: 'admin@icu.local', password: 'admin123', role: 'admin' },
-    { name: 'Dr. Ravi Kumar', email: 'ravi@icu.local', password: 'doctor123', role: 'doctor', specialization: 'Critical Care' },
-    { name: 'Dr. Priya Nair', email: 'priya@icu.local', password: 'doctor123', role: 'doctor', specialization: 'Cardiology' },
-    { name: 'Nurse Anitha', email: 'anu@icu.local', password: 'nurse123', role: 'nurse' },
-    { name: 'Nurse Kumar', email: 'kumar@icu.local', password: 'nurse123', role: 'nurse' }
-  ]);
+  const bedPromises = Array.from({ length: 10 }, (_, i) => {
+    const bedNumber = `ICU-${String(i + 1).padStart(2, '0')}`;
+    return Bed.findOneAndUpdate(
+      { bedNumber },
+      { $setOnInsert: { bedNumber, isOccupied: false, currentPatient: null } },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+  });
+  const beds = await Promise.all(bedPromises);
 
-  // --- Beds ---
-  const beds = await Bed.create(
-    Array.from({ length: 10 }, (_, i) => ({ bedNumber: `ICU-${String(i + 1).padStart(2, '0')}` }))
-  );
-
-  // --- Patients (variety of statuses = variety of vitals) ---
-  const patientsData = [
-    { name: 'Ramesh Iyer', age: 67, gender: 'male', diagnosis: 'Sepsis, AKI', history: 'Diabetic, CKD stage 3', status: 'critical', doctor: drRavi, nurses: [nurseAnu] },
-    { name: 'Lakshmi Menon', age: 54, gender: 'female', diagnosis: 'Post-cardiac surgery', history: 'Hypertension', status: 'critical', doctor: drPriya, nurses: [nurseAnu] },
-    { name: 'Suresh Babu', age: 45, gender: 'male', diagnosis: 'Severe pneumonia', history: 'Smoker', status: 'serious', doctor: drRavi, nurses: [nurseKumar] },
-    { name: 'Fathima Beevi', age: 72, gender: 'female', diagnosis: 'COPD exacerbation', history: 'COPD, ex-smoker', status: 'serious', doctor: drPriya, nurses: [nurseKumar] },
-    { name: 'Arun Prasad', age: 30, gender: 'male', diagnosis: 'Dengue fever', history: 'None', status: 'stable', doctor: drRavi, nurses: [nurseAnu] },
-    { name: 'Divya Raman', age: 28, gender: 'female', diagnosis: 'Post-appendectomy', history: 'None', status: 'stable', doctor: drPriya, nurses: [nurseAnu] },
-    { name: 'Mohan Das', age: 61, gender: 'male', diagnosis: 'Stroke, ICU observation', history: 'Atrial fibrillation', status: 'serious', doctor: drRavi, nurses: [nurseKumar] },
-    { name: 'Geetha Krishnan', age: 49, gender: 'female', diagnosis: 'Ketoacidosis', history: 'Type 1 diabetes', status: 'stable', doctor: drPriya, nurses: [nurseKumar] }
+  const patientSeeds = [
+    { patientId: 'P1001', name: 'Ramesh Iyer', age: 67, gender: 'male', diagnosis: 'Sepsis, AKI', medicalHistory: 'Diabetic, CKD stage 3', status: 'critical', doctor: drRavi._id, nurses: [nurseAnu._id] },
+    { patientId: 'P1002', name: 'Lakshmi Menon', age: 54, gender: 'female', diagnosis: 'Post-cardiac surgery', medicalHistory: 'Hypertension', status: 'critical', doctor: drPriya._id, nurses: [nurseAnu._id] },
+    { patientId: 'P1003', name: 'Suresh Babu', age: 45, gender: 'male', diagnosis: 'Severe pneumonia', medicalHistory: 'Smoker', status: 'serious', doctor: drRavi._id, nurses: [nurseKumar._id] },
+    { patientId: 'P1004', name: 'Fathima Beevi', age: 72, gender: 'female', diagnosis: 'COPD exacerbation', medicalHistory: 'COPD, ex-smoker', status: 'serious', doctor: drPriya._id, nurses: [nurseKumar._id] },
+    { patientId: 'P1005', name: 'Arun Prasad', age: 30, gender: 'male', diagnosis: 'Dengue fever', medicalHistory: 'None', status: 'stable', doctor: drRavi._id, nurses: [nurseAnu._id] },
+    { patientId: 'P1006', name: 'Divya Raman', age: 28, gender: 'female', diagnosis: 'Post-appendectomy', medicalHistory: 'None', status: 'stable', doctor: drPriya._id, nurses: [nurseAnu._id] },
+    { patientId: 'P1007', name: 'Mohan Das', age: 61, gender: 'male', diagnosis: 'Stroke, ICU observation', medicalHistory: 'Atrial fibrillation', status: 'serious', doctor: drRavi._id, nurses: [nurseKumar._id] },
+    { patientId: 'P1008', name: 'Geetha Krishnan', age: 49, gender: 'female', diagnosis: 'Ketoacidosis', medicalHistory: 'Type 1 diabetes', status: 'stable', doctor: drPriya._id, nurses: [nurseKumar._id] }
   ];
 
   const patients = [];
-  for (let i = 0; i < patientsData.length; i++) {
-    const d = patientsData[i];
+  for (let i = 0; i < patientSeeds.length; i += 1) {
+    const payload = patientSeeds[i];
     const bed = beds[i];
-    const p = await Patient.create({
-      patientId: `P${1001 + i}`, name: d.name, age: d.age, gender: d.gender,
-      diagnosis: d.diagnosis, medicalHistory: d.history,
-      icuBed: bed._id, assignedDoctor: d.doctor._id, assignedNurses: d.nurses.map(n => n._id),
-      status: d.status,
-      riskLevel: d.status === 'critical' ? 'high' : d.status === 'serious' ? 'medium' : 'low',
-      riskScore: d.status === 'critical' ? rand(7.5, 9.5) : d.status === 'serious' ? rand(4, 6.5) : rand(1, 3)
-    });
-    bed.isOccupied = true;
-    bed.currentPatient = p._id;
-    await bed.save();
-    patients.push(p);
+    const patient = await Patient.findOneAndUpdate(
+      { patientId: payload.patientId },
+      {
+        $set: {
+          ...payload,
+          icuBed: bed._id,
+          assignedDoctor: payload.doctor,
+          assignedNurses: payload.nurses,
+          riskLevel: payload.status === 'critical' ? 'high' : payload.status === 'serious' ? 'medium' : 'low',
+          riskScore: payload.status === 'critical' ? rand(7.5, 9.5) : payload.status === 'serious' ? rand(4, 6.5) : rand(1, 3),
+          updatedAt: new Date()
+        },
+        $setOnInsert: { createdAt: new Date() }
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    await Bed.findByIdAndUpdate(bed._id, { isOccupied: true, currentPatient: patient._id });
+    patients.push(patient);
   }
 
-  // --- 24h of vitals history (every 15 min = 96 readings per patient) ---
-  console.log('📈 Generating 24h vitals history (this takes a few seconds)...');
   const now = Date.now();
-  let vitalDocs = [];
+  let insertedVitals = 0;
+  for (const patient of patients) {
+    const existingVitalCount = await Vital.countDocuments({ patient: patient._id });
+    if (existingVitalCount >= 48) continue;
 
-  for (const p of patients) {
-    const base = p.status === 'critical'
+    const base = patient.status === 'critical'
       ? { hr: 122, spo2: 88, sys: 160, dia: 95, temp: 38.8, rr: 26 }
-      : p.status === 'serious'
-      ? { hr: 98, spo2: 93, sys: 135, dia: 85, temp: 38.0, rr: 21 }
-      : { hr: 80, spo2: 97, sys: 118, dia: 76, temp: 36.8, rr: 16 };
+      : patient.status === 'serious'
+        ? { hr: 98, spo2: 93, sys: 135, dia: 85, temp: 38.0, rr: 21 }
+        : { hr: 80, spo2: 97, sys: 118, dia: 76, temp: 36.8, rr: 16 };
 
-    // slight worsening trend for critical/serious patients (great for AI summaries)
-    for (let i = 0; i < 96; i++) {
-      const age = (now - (96 - i) * 15 * 60 * 1000); // 24h ago → now
-      const progress = i / 96;
-      const drift = p.status === 'stable' ? 0 : progress; // gets worse over time
-      vitalDocs.push({
-        patient: p._id, source: 'device', timestamp: new Date(age),
+    const docs = [];
+    for (let i = 0; i < 48; i += 1) {
+      const timestamp = new Date(now - (48 - i) * 15 * 60 * 1000);
+      const progress = i / 48;
+      const drift = patient.status === 'stable' ? 0 : progress;
+      docs.push({
+        patient: patient._id,
+        source: 'device',
+        timestamp,
         heartRate: Math.round(base.hr + drift * 14 + rand(-4, 4)),
         systolic: Math.round(base.sys + drift * 10 + rand(-5, 5)),
         diastolic: Math.round(base.dia + drift * 6 + rand(-3, 3)),
@@ -88,24 +113,31 @@ const seed = async () => {
         respiratoryRate: Math.round(base.rr + drift * 4 + rand(-1, 1))
       });
     }
+
+    const inserted = await Vital.insertMany(docs);
+    insertedVitals += inserted.length;
   }
 
-  await Vital.insertMany(vitalDocs);
-  console.log(`✅ ${vitalDocs.length} vital readings created`);
+  await Threshold.findOneAndUpdate(
+    { scope: 'global' },
+    { $setOnInsert: { scope: 'global' } },
+    { upsert: true, new: true }
+  );
 
-  // --- Global threshold config ---
-  await Threshold.create({ scope: 'global' });
-
-  console.log('\n🎉 SEED COMPLETE! Login accounts:');
-  console.log('────────────────────────────────────────');
+  console.log(`\n✅ Seed complete. Demo accounts created or refreshed: ${demoUsers.length} users, ${patients.length} patients, ${insertedVitals} vital readings.`);
+  console.log('Login accounts:');
   console.log('Admin  → admin@icu.local  / admin123');
   console.log('Doctor → ravi@icu.local   / doctor123');
-  console.log('Doctor → priya@icu.local  / doctor123');
+  console.log('Doctor → priya@icu.local / doctor123');
   console.log('Nurse  → anu@icu.local    / nurse123');
   console.log('Nurse  → kumar@icu.local  / nurse123');
-  console.log('────────────────────────────────────────');
+  console.log('Note: Demo credentials are only for local development.');
+
   await mongoose.disconnect();
   process.exit(0);
 };
 
-seed().catch(e => { console.error('Seed failed:', e.message); process.exit(1); });
+seed().catch((error) => {
+  console.error('Seed failed:', error.message);
+  process.exit(1);
+});

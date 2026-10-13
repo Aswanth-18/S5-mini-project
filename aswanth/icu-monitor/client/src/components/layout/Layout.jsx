@@ -7,7 +7,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useAlertStore } from '../../store/alertStore';
 
 export default function Layout() {
-  const { user, logout } = useAuthStore();
+  const { logout } = useAuthStore();
   const { subscribe, fetchAlerts } = useAlertStore();
   const navigate = useNavigate();
 
@@ -16,15 +16,30 @@ export default function Layout() {
     fetchAlerts({ status: 'active' });
     const refresh = setInterval(() => fetchAlerts({}), 30000);
     return () => { unsub(); clearInterval(refresh); };
-  }, []);
+  }, [fetchAlerts, subscribe]);
 
   return (
-    <div className="min-h-screen flex bg-slate-900">
-      <Toaster position="top-right" toastOptions={{ style: { background: '#1e293b', color: '#f1f5f9' } }} />
+    <div className="app-shell flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: '#0f172a',
+            color: '#f8fafc',
+            borderRadius: '12px',
+            border: '1px solid rgba(148,163,184,0.3)',
+            boxShadow: '0 12px 32px rgba(15, 23, 42, 0.18)'
+          }
+        }}
+      />
       <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col">
         <Topbar onLogout={() => { logout(); navigate('/login'); }} />
-        <main className="flex-1 p-6 overflow-auto"><Outlet /></main>
+        <main className="flex-1 overflow-auto">
+          <div className="page-shell">
+            <Outlet />
+          </div>
+        </main>
       </div>
     </div>
   );

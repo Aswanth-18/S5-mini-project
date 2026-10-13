@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "start": "node server.js",
     "seed": "node seeders/seed.js",
+    "seed:reset": "node seeders/reset.js",
     "seed:vitals": "node seeders/seedVitals.js",
     "test": "vitest run"
   },
