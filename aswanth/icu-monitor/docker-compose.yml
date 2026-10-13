@@ -1,0 +1,16 @@
+services:
+  mongo:
+    image: mongo:7
+    ports: ["27017:27017"]
+    volumes: [icu-mongo-data:/data/db]
+  server:
+    build: ./server
+    ports: ["5000:5000"]
+    env_file: ./server/.env
+    depends_on: [mongo]
+  client:
+    build: ./client
+    ports: ["5173:5173"]
+    depends_on: [server]
+volumes:
+  icu-mongo-data:
