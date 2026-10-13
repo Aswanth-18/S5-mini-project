@@ -12,6 +12,8 @@ const initSocket = require('./sockets');
 const { startSimulator } = require('./services/simulator');
 
 const app = express();
+app.set('trust proxy', 1);
+
 const { apiLimiter } = require('./middleware/rateLimiter');
 app.use('/api', apiLimiter);
 
