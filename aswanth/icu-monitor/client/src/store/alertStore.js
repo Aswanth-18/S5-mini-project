@@ -5,13 +5,18 @@ import { notifyUser, playAlertSound } from '../services/notifications';
 
 export const useAlertStore = create((set, get) => ({
   alerts: [],
+  loading: false,
+  error: null,
 
   fetchAlerts: async (params) => {
+    set({ loading: true, error: null });
     try {
       const alerts = await getAlerts(params);
-      set({ alerts });
-    } catch {
-      set({ alerts: [] });
+      set({ alerts, loading: false });
+      return alerts;
+    } catch (error) {
+      set({ loading: false, error: error.response?.data?.message || 'Unable to load alerts' });
+      return null;
     }
   },
 
@@ -21,7 +26,7 @@ export const useAlertStore = create((set, get) => ({
       set({ alerts: get().alerts.map((a) => (a._id === id ? updated : a)) });
       return updated;
     } catch {
-      return null;
+      throw new Error('Unable to acknowledge alert');
     }
   },
 
@@ -31,7 +36,7 @@ export const useAlertStore = create((set, get) => ({
       set({ alerts: get().alerts.map((a) => (a._id === id ? updated : a)) });
       return updated;
     } catch {
-      return null;
+      throw new Error('Unable to resolve alert');
     }
   },
 

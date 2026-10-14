@@ -7,10 +7,12 @@ import AlertFeed from '../../components/alerts/AlertFeed';
 import { useAuthStore } from '../../store/authStore';
 
 export default function NurseDashboard() {
-  const { patients, loading, fetchPatients } = usePatientStore();
+  const patients = usePatientStore((s) => s.patients);
+  const loading = usePatientStore((s) => s.loading);
+  const fetchPatients = usePatientStore((s) => s.fetchPatients);
   const user = useAuthStore((s) => s.user);
-  useEffect(() => { fetchPatients(); }, []);
-  const mine = patients.filter((p) => p.assignedNurses?.some((n) => n._id === user._id || n === user._id));
+  useEffect(() => { fetchPatients(); }, [fetchPatients]);
+  const mine = patients.filter((p) => p.assignedNurses?.some((n) => n._id === user?._id || n === user?._id));
   if (loading) return <Loader />;
   return (
     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">

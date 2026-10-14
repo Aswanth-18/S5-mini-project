@@ -8,5 +8,5 @@ export default function useSocket(events = {}) {
     const entries = Object.entries(events);
     entries.forEach(([ev, handler]) => s.on(ev, handler));
     return () => entries.forEach(([ev, handler]) => s.off(ev, handler));
-  }, []);
+  }, [events]);
 }

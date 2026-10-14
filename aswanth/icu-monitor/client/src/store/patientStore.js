@@ -7,17 +7,30 @@ export const usePatientStore = create((set, get) => ({
   current: null,
   vitals: [],
   loading: false,
+  error: null,
 
   fetchPatients: async (params) => {
-    set({ loading: true });
-    const patients = await getPatients(params);
-    set({ patients, loading: false });
+    set({ loading: true, error: null });
+    try {
+      const patients = await getPatients(params);
+      set({ patients: Array.isArray(patients) ? patients : [], loading: false });
+      return patients;
+    } catch (error) {
+      set({ loading: false, error: error.response?.data?.message || 'Unable to load patients' });
+      return null;
+    }
   },
 
   fetchPatient: async (id) => {
-    set({ loading: true });
-    const [current, vitals] = await Promise.all([getPatient(id), getVitals(id, 100)]);
-    set({ current, vitals, loading: false });
+    set((state) => ({ loading: true, error: null, current: state.current?._id === id ? state.current : null, vitals: state.current?._id === id ? state.vitals : [] }));
+    try {
+      const [current, vitals] = await Promise.all([getPatient(id), getVitals(id, 100)]);
+      set({ current, vitals, loading: false });
+      return current;
+    } catch (error) {
+      set({ current: null, loading: false, error: error.response?.data?.message || 'Unable to load patient details' });
+      return null;
+    }
   },
 
   discharge: async (id) => {
@@ -35,5 +48,5 @@ export const usePatientStore = create((set, get) => ({
     });
   },
 
-  clear: () => set({ current: null, vitals: [] })
+  clear: () => set({ current: null, vitals: [], error: null })
 }));

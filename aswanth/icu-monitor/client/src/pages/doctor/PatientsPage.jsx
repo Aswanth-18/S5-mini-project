@@ -4,8 +4,10 @@ import { usePatientStore } from '../../store/patientStore';
 import PatientCard from '../../components/patients/PatientCard';
 import Loader from '../../components/common/Loader';
 export default function PatientsPage() {
-  const { patients, loading, fetchPatients } = usePatientStore();
-  useEffect(() => { fetchPatients(); }, []);
+  const patients = usePatientStore((s) => s.patients);
+  const loading = usePatientStore((s) => s.loading);
+  const fetchPatients = usePatientStore((s) => s.fetchPatients);
+  useEffect(() => { fetchPatients(); }, [fetchPatients]);
   if (loading) return <Loader />;
   return (<div>
     <h1 className="text-2xl font-bold mb-4">My Patients ({patients.length})</h1>

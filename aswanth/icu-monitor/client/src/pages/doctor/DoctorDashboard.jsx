@@ -12,9 +12,10 @@ export default function DoctorDashboard() {
   useEffect(() => {
     fetchPatients();
     const s = getSocket();
-    s.on('vitals:new', ({ patientId, vital }) => pushVital(patientId, vital));
-    return () => s.off('vitals:new');
-  }, []);
+    const onVital = ({ patientId, vital }) => pushVital(patientId, vital);
+    s.on('vitals:new', onVital);
+    return () => s.off('vitals:new', onVital);
+  }, [fetchPatients, pushVital]);
 
   const critical = patients.filter((p) => p.status === 'critical');
   const serious = patients.filter((p) => p.status === 'serious');

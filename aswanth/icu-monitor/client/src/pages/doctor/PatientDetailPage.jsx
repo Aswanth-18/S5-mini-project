@@ -18,7 +18,7 @@ import { canDischarge } from '../../utils/permissions';
 export default function PatientDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { current, vitals, fetchPatient, pushVital, clear } = usePatientStore();
+  const { current, vitals, loading, error, fetchPatient, pushVital, clear } = usePatientStore();
   const { user } = useAuthStore();
   const [dischargeOpen, setDischargeOpen] = useState(false);
 
@@ -26,12 +26,15 @@ export default function PatientDetailPage() {
     fetchPatient(id);
     const s = getSocket();
     s.emit('join:patient', id);
-    s.on('vitals:new', (v) => { if (v.patient === id || v.patientId === id) pushVital(id, v); });
-    s.on('ai:update', () => fetchPatient(id));
-    return () => { s.emit('leave:patient', id); s.off('vitals:new'); s.off('ai:update'); clear(); };
-  }, [id]);
+    const onVital = (v) => { if (String(v.patient?._id || v.patient || v.patientId) === String(id)) pushVital(id, v); };
+    const onAiUpdate = () => fetchPatient(id);
+    s.on('vitals:new', onVital);
+    s.on('ai:update', onAiUpdate);
+    return () => { s.emit('leave:patient', id); s.off('vitals:new', onVital); s.off('ai:update', onAiUpdate); clear(); };
+  }, [id, fetchPatient, pushVital, clear]);
 
-  if (!current) return <Loader label="Loading patient…" />;
+  if (!current && loading) return <Loader label="Loading patient…" />;
+  if (!current) return <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">{error || 'Patient record unavailable.'}<button type="button" onClick={() => fetchPatient(id)} className="ml-3 font-semibold underline">Retry</button></div>;
   const p = current;
   const latest = vitals[vitals.length - 1] || {};
 

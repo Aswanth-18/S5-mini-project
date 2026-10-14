@@ -1,4 +1,6 @@
-export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const runtimeEnv = typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env : {};
+
+export const API_BASE = runtimeEnv.VITE_API_URL || 'http://localhost:5000/api';
 
 export async function fetchJson(url, options = {}) {
   const response = await fetch(url, {

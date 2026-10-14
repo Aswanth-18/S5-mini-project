@@ -14,12 +14,13 @@ const FIELDS = [
 ];
 
 export default function VitalsEntryPage() {
-  const { patients, fetchPatients } = usePatientStore();
+  const patients = usePatientStore((s) => s.patients);
+  const fetchPatients = usePatientStore((s) => s.fetchPatients);
   const [patientId, setPatientId] = useState('');
   const [form, setForm] = useState({});
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => { fetchPatients(); }, []);
+  useEffect(() => { fetchPatients(); }, [fetchPatients]);
 
   const submit = async (e) => {
     e.preventDefault();

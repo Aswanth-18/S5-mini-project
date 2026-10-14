@@ -24,7 +24,10 @@ const clearAuthSession = () => {
   }
 };
 
-const api = axios.create({ baseURL: import.meta.env.VITE_API_URL + '/api' });
+const api = axios.create({
+  baseURL: `${(import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '')}/api`,
+  timeout: Number(import.meta.env.VITE_API_TIMEOUT_MS) || 15000
+});
 
 api.interceptors.request.use((config) => {
   const token = getStoredValue('token');
